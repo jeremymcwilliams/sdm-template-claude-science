@@ -67,10 +67,73 @@ shift.
 
 ---
 
+## Setup — install the packages
+
+Pick **one** of these. They install the same seven R packages; they
+differ only in *how*. If you're on Posit Cloud or any plain R install,
+use Option A — it needs no conda.
+
+### Option A — native R (Posit Cloud, RStudio Desktop, HPC R module)
+
+```r
+# From the project root, in R (or: Rscript install.R)
+source("install.R")
+```
+
+`install.R` uses R's own `install.packages()`. On Posit Cloud this pulls
+**precompiled binaries** from the Posit Public Package Manager (the
+default there), so it's fast and needs no compiler. The script installs
+only what's missing and then checks that every package loads.
+
+> **System libraries.** `terra` and `sf` sit on GDAL, GEOS and PROJ.
+> Posit Cloud and most RStudio Server images already have these. If a
+> build fails on a machine you control, install them once at the OS level
+> (the script prints the exact command for Ubuntu, macOS, or an HPC
+> module) and re-run.
+
+### Option B — conda (HPC, or if you already use conda)
+
+```bash
+conda env create -f environment.yml   # creates env "sdm"
+conda activate sdm
+```
+
+Versions are pinned to the set this template was verified with.
+
+### Option C — renv (optional, exact version locking for a class)
+
+If you want every student to get the **exact same** package versions,
+this repo ships a ready-made [`renv`](https://rstudio.github.io/renv/)
+lockfile (`renv.lock`) — Posit's native reproducibility tool, the
+parallel to conda's version pins but pure R:
+
+```r
+install.packages("renv")
+renv::restore()   # reads renv.lock, installs those exact versions
+```
+
+`renv.lock` records all 25 packages (the 7 direct + their dependencies)
+at the versions this template was verified with, R 4.5.3.
+
+**Does this conflict with Options A and B? No — it's opt-in.** The repo
+contains *only* the `renv.lock` file, which is inert: nothing reads it
+unless you personally run `renv::restore()`. There is deliberately no
+`.Rprofile` or `renv/` auto-activation folder, so the project does **not**
+silently switch anyone into an renv sandbox. A student using `install.R`
+or conda is completely unaffected by the lockfile's presence. Opt in only
+if you want the version locking.
+
+> **Regenerating the lock.** After changing package versions, run
+> `renv::init()` then `renv::snapshot()` to refresh `renv.lock`. If you do
+> this, delete the `.Rprofile` and `renv/` folder that `init()` creates
+> before committing, to keep the lockfile opt-in as above.
+
+---
+
 ## Quick start
 
 ```bash
-# From the sdm_template/ directory, in the `sdm` R environment:
+# From the project root, after setup (Option A/B/C above):
 Rscript run_all.R
 ```
 
@@ -262,9 +325,14 @@ outputs/
 
 ## Dependencies
 
-R packages (conda env `sdm`): `terra`, `predicts`, `randomForest`, `sf`,
-`corrplot`, `httr`, `jsonlite`. GBIF and WorldClim are accessed by direct
-download, so no API wrapper packages are required.
+R packages: `terra`, `predicts`, `randomForest`, `sf`, `corrplot`,
+`httr`, `jsonlite`. Install them with **`install.R`** (native R, no conda),
+**`environment.yml`** (conda), or **`renv`** — see [Setup](#setup--install-the-packages).
+GBIF and WorldClim are accessed by direct download, so no API wrapper
+packages are required.
+
+System libraries (for `terra`/`sf`): GDAL, GEOS, PROJ — preinstalled on
+Posit Cloud and most RStudio Server images.
 
 Data sources: [GBIF](https://www.gbif.org) (occurrences),
 [WorldClim 2.1](https://www.worldclim.org) (climate).
