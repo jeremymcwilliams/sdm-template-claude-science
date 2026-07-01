@@ -1,0 +1,20 @@
+# =====================================================================
+# Conda environment for the SDM template.
+#   conda env create -f environment.yml
+#   conda activate sdm
+#   Rscript run_all.R
+# Versions pinned to the set this template was verified with. Loosen the
+# pins (drop the "=x.y.z") if your channel snapshot differs.
+# =====================================================================
+name: sdm
+channels:
+  - conda-forge
+dependencies:
+  - r-base=4.5.3
+  - r-terra=1.9.34
+  - r-predicts=0.2.2
+  - r-randomforest=4.7.1.2
+  - r-sf=1.1.0
+  - r-corrplot=0.95
+  - r-httr=1.4.8
+  - r-jsonlite=2.0.0

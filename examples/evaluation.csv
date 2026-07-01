@@ -1,0 +1,2 @@
+"species","method","n_train","n_test","auc","cor","threshold_maxSSS"
+"Pseudotsuga menziesii","rf",9416,3138,0.959167084639498,0.758255797644075,0.4689

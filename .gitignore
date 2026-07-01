@@ -1,0 +1,32 @@
+# =====================================================================
+# Data & outputs are regenerable by running the pipeline — do not commit.
+# =====================================================================
+data/raw/
+data/processed/
+outputs/
+
+# Keep the folder structure in a fresh clone (the scripts also mkdir these,
+# but committing empty dirs makes the layout obvious). Remove these negations
+# if you prefer the dirs created only at runtime.
+!data/
+!data/.gitkeep
+!outputs/
+!outputs/.gitkeep
+
+# ---- R ----
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# ---- renv (if you switch to it) ----
+renv/library/
+renv/local/
+renv/staging/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*~
+.vscode/
+.idea/
