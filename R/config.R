@@ -38,6 +38,22 @@ cfg <- list(
   method = "rf",
   rf_ntree = 1000,
 
+  # ---- Future climate projection (CMIP6, step 06) --------------------
+  # The model is fitted ONCE on current climate (01-04); step 06 simply
+  # projects that fitted model onto future climate surfaces. See the
+  # README section "Projecting to future climate" for what each choice
+  # means and how to pick.
+  #
+  # gcm    : one or more CMIP6 global climate models (WorldClim 2.1 hosts
+  #          ~24). Give a vector to build a multi-model ENSEMBLE (mean +
+  #          agreement) instead of a single map — recommended.
+  # ssp    : emissions scenario. One of "ssp126","ssp245","ssp370","ssp585".
+  # periods: one or more 20-yr windows: "2021-2040","2041-2060",
+  #          "2061-2080","2081-2100".
+  future_gcm    = c("MPI-ESM1-2-HR", "MRI-ESM2-0", "EC-Earth3-Veg"),
+  future_ssp    = "ssp245",
+  future_periods = c("2041-2060", "2081-2100"),
+
   # ---- Reproducibility & paths --------------------------------------
   seed = 42,
   occ_limit = 8000,               # max GBIF records to pull (paged 300/req)
