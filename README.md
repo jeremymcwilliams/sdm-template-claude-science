@@ -5,40 +5,70 @@ distribution model from open data. Built for teaching and for getting a
 defensible first model quickly — every step is a separate, readable R
 script that can be run on its own or as part of the whole pipeline.
 
-**Worked example:** Douglas-fir (*Pseudotsuga menziesii*) across western
-North America. Swap the species in one line (`R/config.R`).
+**Worked example:** North American river otter (*Lontra canadensis*)
+across western North America. Swap the species in one line (`R/config.R`).
 
 ---
 
 ## Example output
 
-The template ships with the outputs of a verified Douglas-fir run (10
+The template ships with the outputs of a verified river otter run (10
 arc-minute resolution, random forest) under [`examples/`](examples/).
 
-![Douglas-fir habitat suitability](examples/05_suitability_map.png)
+![River otter habitat suitability](examples/05_suitability_map.png)
 
-Predicted suitability tracks the species' actual range — the Coast
-Ranges, Cascades, Sierra Nevada, and northern Rockies. Held-out
-performance for this run:
+Predicted suitability is highest along the Pacific coast and the river
+valleys of the Northwest. Note the strong observation-bias signal: otter
+records concentrate where people are (the Willamette Valley, Puget Sound,
+the Bay Area), so the map partly reflects *where otters get reported* as
+much as where they can live — a useful classroom discussion point.
+Held-out performance for this run:
 
 | Metric | Value |
 |--------|-------|
-| Test AUC | 0.959 |
-| Test correlation | 0.758 |
-| Max-SSS threshold | 0.469 |
+| Test AUC | 0.953 |
+| Test correlation | 0.747 |
+| Max-SSS threshold | 0.402 |
 | Predictors retained | 8 of 19 (|r| > 0.7 pruned) |
 
 > These are presence-vs-background metrics on a random split — read the
-> [caveats](#method-notes--caveats) before quoting them.
+> [caveats](#method-notes--caveats) before quoting them. Bioclim
+> predictors describe *climate*, not rivers or wetlands, so for a
+> water-linked mammal like the otter the model is genuinely a coarse
+> climate-envelope proxy — another honest teaching moment.
+
+**How honest is that AUC? — spatial cross-validation (step 04b).** The
+0.953 above comes from a *random* train/test split, where held-out points
+sit right next to training points and the model gets to peek at
+neighbours. Step 04b instead lays a grid of square blocks over the map,
+deals whole blocks into folds, and holds out *entire regions* at a time —
+a harder, more honest test of whether the model transfers to places it
+has never seen.
+
+![Spatial cross-validation: fold map and AUC comparison](examples/04b_spatial_cv.png)
+
+| Evaluation | Test AUC |
+|------------|----------|
+| Random split (step 04) | 0.953 |
+| Spatial block CV (step 04b, 5 folds, 3° blocks) | 0.908 ± 0.028 |
+
+The spatially-blocked AUC is **lower** — that drop is the whole lesson.
+The model is a little more optimistic than it should be when you let it
+peek at nearby points; asked to predict genuinely new regions, it does
+somewhat worse. (The gap is modest here because the otter data spans many
+well-separated blocks; for a species known from a few tight clusters the
+gap is often dramatic.) Toggle it with `run_spatial_cv` in the config and
+tune the difficulty with `spatial_block_deg` (bigger blocks = harder
+test) and `spatial_cv_k`.
 
 And the future projection (step 6) — 3-GCM ensemble, SSP2-4.5, end of
-century — showing where that same niche is projected to move:
+century — showing where that same climate niche is projected to move:
 
-![Douglas-fir future projection, SSP2-4.5 2081-2100](examples/06_future_ssp245_2081-2100.png)
+![River otter future projection, SSP2-4.5 2081-2100](examples/06_future_ssp245_2081-2100.png)
 
-Gains (green) appear to the north and at elevation; losses (red) at the
-warm, dry southern margin — the fingerprint of climate-driven range
-shift.
+Gains (green) appear inland and to the north; losses (red) at the warm,
+dry southern margin of the modeled niche — the fingerprint of
+climate-driven range shift.
 
 ---
 
@@ -56,6 +86,9 @@ shift.
 4. **Fit & evaluate** — fits a down-sampled random forest (or logistic
    GLM), evaluates on held-out data (AUC, correlation, max-SSS
    threshold), and plots ROC + variable importance.
+   *(4b, optional)* **Spatial cross-validation** — re-scores the model
+   with spatially-blocked folds (holds out whole regions) for an honest,
+   less optimistic AUC. Toggle with `run_spatial_cv`.
 5. **Project (current)** — predicts habitat suitability across the
    region, writes a continuous suitability raster and a binary presence
    raster, and draws the map.
@@ -165,9 +198,15 @@ Everything is set in one file. The most common edits:
 | `n_background` | Number of background / pseudo-absence points |
 | `thin_dist_km` | Spatial thinning distance |
 | `method` | `"rf"` (random forest) or `"glm"` |
+| `run_spatial_cv` | `TRUE`/`FALSE` — run step 04b (spatially-blocked CV) |
+| `spatial_block_deg` | Block size in degrees (bigger = harder test) |
+| `spatial_cv_k` | Number of spatial folds |
 | `future_gcm` | Which CMIP6 climate model(s); a vector = ensemble |
 | `future_ssp` | Emissions scenario (`"ssp126"`…`"ssp585"`) |
 | `future_periods` | Which 20-year future window(s) |
+| `borders_state` | `TRUE`/`FALSE` — draw state / province lines on maps |
+| `borders_country` | `TRUE`/`FALSE` — draw country outlines on maps |
+| `borders_scale` | Border detail: `"50m"` (default) or `"10m"` (finer) |
 | `seed` | Reproducibility |
 
 To model a different species, change only `species_name`, `species_short`,
@@ -271,6 +310,47 @@ of climate-driven range shift.
 
 ---
 
+## Administrative borders (for assessment context)
+
+Species distribution models often feed a **Species Assessment** — the kind
+of analysis a management agency (e.g. US Fish & Wildlife Service, a state
+department of natural resources, a provincial ministry) uses to weigh a
+decision: *should a road go here? will this activity affect the species?*
+For that, a suitability surface is far more useful with **jurisdictional
+boundaries** drawn on it — you can see at a glance that a suitable patch
+straddles the Oregon/Washington line (two state agencies are
+stakeholders), or crosses into British Columbia (an international
+population).
+
+The maps in steps 05 and 06 are drawn with **ggplot2** and can overlay
+borders from [Natural Earth](https://www.naturalearthdata.com/) (public
+domain). Two independent switches in `R/config.R`:
+
+```r
+borders_state   = TRUE,    # state / province lines (US, Canada, Mexico)
+borders_country = TRUE,    # country outlines
+borders_scale   = "50m",   # "50m" (default) or "10m" (finer coastlines)
+```
+
+Set either to `FALSE` to omit that layer; set both to `FALSE` for a plain
+suitability surface. The `admin_1` layer covers **US states, Canadian
+provinces, and Mexican states** in one file, so the whole western-North-
+America extent is labelled consistently.
+
+**How it's fetched.** Borders download once from Natural Earth's public
+GitHub mirror and are cached under `data/raw/natural_earth/` — the same
+direct-download approach the template uses for GBIF and WorldClim, so no
+extra R packages beyond `ggplot2`. If the download can't complete (e.g.
+offline), the maps **still render without borders** and print a notice,
+rather than stopping the pipeline.
+
+> **Swapping regions.** Because borders are cropped to your `extent`, the
+> same switches work for any study area — model a species in the
+> Appalachians or the Alps and the relevant states/countries appear
+> automatically.
+
+---
+
 ## Outputs
 
 ```
@@ -283,7 +363,8 @@ outputs/
   <species>_presence.tif      binary presence at max-SSS threshold
   models/
     <species>_model.rds       fitted model object
-    evaluation.csv            AUC, correlation, threshold
+    evaluation.csv            AUC, correlation, threshold (random split)
+    spatial_cv.csv            per-fold + mean AUC (spatial CV, step 04b)
   future/                                  (step 06)
     <species>_<ssp>_<period>_suitability.tif  ensemble-mean future suitability
     <species>_<ssp>_<period>_agreement.tif    # GCMs agreeing (0..n)
@@ -293,6 +374,7 @@ outputs/
     03_predictor_correlation.png
     04_roc.png
     04_variable_importance.png
+    04b_spatial_cv.png                        fold map + random-vs-spatial AUC
     05_suitability_map.png
     06_future_<ssp>_<period>.png              future suitability + change map
 ```
@@ -308,10 +390,13 @@ outputs/
   cities, and well-surveyed regions. Spatial thinning mitigates but does
   not remove this. For publication, consider a target-group background
   or bias layer.
-- **No spatial cross-validation.** The train/test split is random. Because
-  occurrences are spatially autocorrelated, a random split inflates AUC
-  relative to spatially blocked CV (`blockCV`). Treat the AUC here as
-  optimistic.
+- **Random split vs. spatial CV.** The headline AUC in `evaluation.csv`
+  comes from a *random* train/test split. Because occurrences are
+  spatially autocorrelated, that number is optimistic — treat it as an
+  upper bound. Step 04b (`run_spatial_cv`) reports the spatially-blocked
+  AUC, which holds out whole regions and is the more honest figure to
+  quote. Use the two together: the gap between them is itself a diagnostic
+  of how much the model is leaning on spatial clustering.
 - **Collinearity pruning is greedy** and based on Pearson |r| only;
   consider VIF for a more principled selection.
 - **Future projections are correlative.** Step 06 assumes the species'
@@ -326,13 +411,15 @@ outputs/
 ## Dependencies
 
 R packages: `terra`, `predicts`, `randomForest`, `sf`, `corrplot`,
-`httr`, `jsonlite`. Install them with **`install.R`** (native R, no conda),
-**`environment.yml`** (conda), or **`renv`** — see [Setup](#setup--install-the-packages).
-GBIF and WorldClim are accessed by direct download, so no API wrapper
+`ggplot2`, `httr`, `jsonlite`. Install them with **`install.R`** (native R,
+no conda), **`environment.yml`** (conda), or **`renv`** —
+see [Setup](#setup--install-the-packages). GBIF, WorldClim, and Natural
+Earth borders are all accessed by direct download, so no API wrapper
 packages are required.
 
 System libraries (for `terra`/`sf`): GDAL, GEOS, PROJ — preinstalled on
 Posit Cloud and most RStudio Server images.
 
 Data sources: [GBIF](https://www.gbif.org) (occurrences),
-[WorldClim 2.1](https://www.worldclim.org) (climate).
+[WorldClim 2.1](https://www.worldclim.org) (climate),
+[Natural Earth](https://www.naturalearthdata.com/) (administrative borders).

@@ -1,2 +1,2 @@
 "species","method","n_train","n_test","auc","cor","threshold_maxSSS"
-"Pseudotsuga menziesii","rf",9416,3138,0.959167084639498,0.758255797644075,0.4689
+"Lontra canadensis","rf",9033,3011,0.953447749510763,0.747252310444299,0.4019

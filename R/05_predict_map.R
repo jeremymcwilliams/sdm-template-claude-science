@@ -9,6 +9,9 @@ suppressPackageStartupMessages({ library(terra) })
 
 predictors <- rast(file.path(cfg$dir_proc, "predictors.tif"))
 mo <- readRDS(file.path(cfg$dir_mod, paste0(cfg$species_short, "_model.rds")))
+# The model's predict() method lives in its own package; load it so this
+# step also works when run on its own (not only via run_all.R).
+if (identical(mo$method, "rf")) suppressPackageStartupMessages(library(randomForest))
 occ <- read.csv(file.path(cfg$dir_proc,
                           paste0(cfg$species_short, "_occ_clean.csv")))
 
@@ -29,11 +32,14 @@ writeRaster(pres,
             overwrite = TRUE)
 message("05 | Wrote suitability + binary rasters")
 
-# ---- Map figure -------------------------------------------------------
-png(file.path(cfg$dir_fig, "05_suitability_map.png"),
-    width = 1100, height = 1100, res = 150)
-plot(suit, col = hcl.colors(100, "Viridis"),
-     main = paste0(cfg$species_name, " - habitat suitability"))
-points(occ$lon, occ$lat, pch = 16, cex = 0.2, col = adjustcolor("white", 0.5))
-dev.off()
+# ---- Map figure (ggplot; optional admin borders via config) ----------
+source("R/helpers_map.R")
+borders <- get_borders(suit, cfg)
+sub <- if (isTRUE(cfg$borders_state) || isTRUE(cfg$borders_country))
+         "with administrative borders" else NULL
+p <- gg_suitability(suit, cfg, borders,
+                    title = paste0(cfg$species_name, " - habitat suitability"),
+                    subtitle = sub, occ = occ)
+ggsave(file.path(cfg$dir_fig, "05_suitability_map.png"), p,
+       width = 8, height = 8, dpi = 150)
 message("05 | Wrote suitability map figure")

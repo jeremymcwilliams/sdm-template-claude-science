@@ -10,12 +10,15 @@ cfg <- list(
   # ---- Species -------------------------------------------------------
   # Accepted scientific name. The pipeline resolves it against the GBIF
   # backbone, so spelling must be close enough for a fuzzy match.
-  species_name = "Pseudotsuga menziesii",   # Douglas-fir
-  species_short = "douglas_fir",            # used in filenames (no spaces)
+  species_name = "Lontra canadensis",      # North American river otter
+  species_short = "river_otter",            # used in filenames (no spaces)
 
   # ---- Study region (lon/lat bounding box, WGS84) --------------------
-  # Default: western North America. Set to NULL to use the full extent
-  # of the cleaned occurrences (padded by `extent_pad_deg`).
+  # Default: western North America (a good fit for a Pacific-NW campus and
+  # a small, class-friendly download). The river otter actually ranges
+  # across the whole continent — to model its full range, widen this box,
+  # e.g. c(xmin = -165, xmax = -52, ymin = 25, ymax = 70). Set to NULL to
+  # use the full extent of the cleaned occurrences (padded by extent_pad_deg).
   extent = c(xmin = -140, xmax = -100, ymin = 30, ymax = 62),
   extent_pad_deg = 2,
 
@@ -38,6 +41,23 @@ cfg <- list(
   method = "rf",
   rf_ntree = 1000,
 
+  # ---- Spatial cross-validation (optional, step 04b) ----------------
+  # The AUC printed by step 04 uses a RANDOM train/test split: test points
+  # sit right next to training points, so the model gets to "peek" at
+  # nearby records. That flatters a spatially-clustered dataset (like the
+  # otter's, which piles up around cities). Step 04b instead lays a grid
+  # of square blocks over the map, assigns whole blocks to folds, and
+  # holds out entire regions at a time — a harder, more honest test of
+  # whether the model transfers to places it has not seen. The spatial
+  # AUC is usually LOWER; the gap between the two is the teaching point.
+  #   run_spatial_cv   : TRUE/FALSE — run step 04b at all
+  #   spatial_block_deg: block size in degrees (~3 deg ≈ 300 km). Bigger
+  #                      blocks = harder test (folds are farther apart).
+  #   spatial_cv_k     : number of folds (blocks are dealt into k groups)
+  run_spatial_cv    = TRUE,
+  spatial_block_deg = 3,
+  spatial_cv_k      = 5,
+
   # ---- Future climate projection (CMIP6, step 06) --------------------
   # The model is fitted ONCE on current climate (01-04); step 06 simply
   # projects that fitted model onto future climate surfaces. See the
@@ -53,6 +73,21 @@ cfg <- list(
   future_gcm    = c("MPI-ESM1-2-HR", "MRI-ESM2-0", "EC-Earth3-Veg"),
   future_ssp    = "ssp245",
   future_periods = c("2041-2060", "2081-2100"),
+
+  # ---- Map borders (for Species Assessment / agency context) --------
+  # Overlay administrative boundaries on the suitability + change maps,
+  # so a suitable patch can be read against the jurisdictions that manage
+  # it (e.g. which states share a population). Borders are downloaded
+  # once from Natural Earth (public domain) and cached; if the download
+  # fails the maps still render, just without borders.
+  #   borders_state   : state / province lines (US states, CA provinces,
+  #                     MX states) — TRUE/FALSE
+  #   borders_country : country outlines (US / Canada / Mexico) — TRUE/FALSE
+  #   borders_scale   : "50m" (default, plenty for regional maps) or
+  #                     "10m" (finer coastlines, larger download)
+  borders_state   = TRUE,
+  borders_country = TRUE,
+  borders_scale   = "50m",
 
   # ---- Reproducibility & paths --------------------------------------
   seed = 42,

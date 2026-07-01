@@ -16,5 +16,6 @@ dependencies:
   - r-randomforest=4.7.1.2
   - r-sf=1.1.0
   - r-corrplot=0.95
+  - r-ggplot2=4.0.3
   - r-httr=1.4.8
   - r-jsonlite=2.0.0

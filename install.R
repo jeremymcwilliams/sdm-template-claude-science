@@ -20,8 +20,9 @@ pkgs <- c(
   "terra",        # rasters, spatial predict
   "predicts",     # SDM helpers, pa_evaluate, background sampling
   "randomForest", # the default model
-  "sf",           # vector geometry / thinning
+  "sf",           # vector geometry / thinning / borders
   "corrplot",     # predictor-correlation figure
+  "ggplot2",      # publication maps with admin borders (steps 05, 06)
   "httr",         # GBIF + WorldClim downloads
   "jsonlite"      # GBIF JSON parsing
 )

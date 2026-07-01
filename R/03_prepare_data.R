@@ -64,16 +64,22 @@ dat <- rbind(
   data.frame(pa = 0, bg_env[, vars, drop = FALSE])
 )
 dat$pa <- factor(dat$pa, levels = c(0, 1))
+# Coordinates aligned row-for-row with `dat` (presences first, then
+# background) so the spatial-CV step (04b) can block points by location.
+coords <- rbind(as.matrix(pres_xy), as.matrix(bg_xy))
+colnames(coords) <- c("lon", "lat")
 
 # ---- Train / test split (stratified by presence/absence) -------------
 idx_p <- which(dat$pa == 1); idx_a <- which(dat$pa == 0)
 te_p <- sample(idx_p, round(cfg$test_fraction * length(idx_p)))
 te_a <- sample(idx_a, round(cfg$test_fraction * length(idx_a)))
-test  <- dat[c(te_p, te_a), ]
-train <- dat[-c(te_p, te_a), ]
+te_idx <- c(te_p, te_a)
+test  <- dat[te_idx, ]
+train <- dat[-te_idx, ]
 message("03 | Train: ", nrow(train), "  Test: ", nrow(test))
 
 saveRDS(list(train = train, test = test, vars = vars,
-             pres_xy = pres_xy, bg_xy = bg_xy),
+             pres_xy = pres_xy, bg_xy = bg_xy,
+             dat = dat, coords = coords),
         file.path(cfg$dir_proc, "model_data.rds"))
 message("03 | Wrote ", file.path(cfg$dir_proc, "model_data.rds"))

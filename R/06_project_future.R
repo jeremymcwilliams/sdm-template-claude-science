@@ -17,12 +17,15 @@
 #           outputs/figures/06_future_<ssp>_<period>.png
 # ---------------------------------------------------------------------
 suppressPackageStartupMessages({ library(terra) })
+source("R/helpers_map.R")            # borders + ggplot map helpers
 
 dir_fut <- file.path("outputs", "future")
 dir.create(dir_fut, recursive = TRUE, showWarnings = FALSE)
 
 # ---- Load fitted model, its predictors, and current suitability ------
 mo <- readRDS(file.path(cfg$dir_mod, paste0(cfg$species_short, "_model.rds")))
+# Load the model's package so this step also runs standalone (see step 05).
+if (identical(mo$method, "rf")) suppressPackageStartupMessages(library(randomForest))
 vars <- mo$vars                      # predictors the model actually uses
 thr  <- mo$threshold                 # max-SSS presence threshold
 cur_suit <- rast(file.path("outputs",
@@ -87,18 +90,21 @@ for (period in cfg$future_periods) {
   writeRaster(agreement, file.path(dir_fut, paste0(tag, "_agreement.tif")),   overwrite = TRUE)
   writeRaster(change,    file.path(dir_fut, paste0(tag, "_change.tif")),      overwrite = TRUE)
 
-  # ---- Figure: future suitability + change map -----------------------
+  # ---- Figure: future suitability + change map (ggplot, 2 panels) ----
+  # Borders (config-driven) reused for both panels; fetch once.
+  borders <- get_borders(ens_suit, cfg)
+  p_suit <- gg_suitability(ens_suit, cfg, borders,
+              title = paste0(cfg$species_name, " - ", cfg$future_ssp, " ", period),
+              subtitle = paste0("mean of ", length(cfg$future_gcm), " GCMs"))
+  p_chg  <- gg_change(change, cfg, borders,
+              title = paste0("Range change vs current - ", cfg$future_ssp, " ", period))
   png(file.path(cfg$dir_fig, paste0("06_future_", cfg$future_ssp, "_", period, ".png")),
       width = 1700, height = 850, res = 150)
-  op <- par(mfrow = c(1, 2), mar = c(3, 3, 3, 4))
-  plot(ens_suit, col = hcl.colors(100, "Viridis"), range = c(0, 1),
-       main = paste0(cfg$species_name, "\n", cfg$future_ssp, " ", period,
-                     " (mean of ", length(cfg$future_gcm), " GCMs)"))
-  cols <- c("grey90", "#d73027", "#4575b4", "#1a9850")  # unsuit, loss, stable, gain
-  plot(change, col = cols, type = "classes",
-       levels = c("unsuitable", "loss", "stable", "gain"),
-       main = paste0("Range change vs current\n", cfg$future_ssp, " ", period))
-  par(op); dev.off()
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(1, 2)))
+  print(p_suit, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  print(p_chg,  vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
+  dev.off()
 
   # ---- Quick summary to console --------------------------------------
   fr <- freq(change)
