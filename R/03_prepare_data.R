@@ -10,7 +10,7 @@
 suppressPackageStartupMessages({ library(terra); library(predicts) })
 set.seed(cfg$seed)
 
-predictors <- rast(file.path(cfg$dir_proc, "predictors.tif"))
+predictors <- rast(file.path(cfg$dir_proc, paste0(cfg$species_short, "_predictors.tif")))
 occ <- read.csv(file.path(cfg$dir_proc,
                           paste0(cfg$species_short, "_occ_clean.csv")))
 
@@ -47,7 +47,7 @@ repeat {
 message("03 | Retained ", length(vars), " predictors: ", paste(vars, collapse = ", "))
 
 # Correlation figure (full matrix, retained vars highlighted)
-png(file.path(cfg$dir_fig, "03_predictor_correlation.png"),
+png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_03_predictor_correlation.png")),
     width = 1100, height = 1000, res = 150)
 if (requireNamespace("corrplot", quietly = TRUE)) {
   corrplot::corrplot(cor(rbind(pres_env, bg_env)), method = "color",
@@ -81,5 +81,5 @@ message("03 | Train: ", nrow(train), "  Test: ", nrow(test))
 saveRDS(list(train = train, test = test, vars = vars,
              pres_xy = pres_xy, bg_xy = bg_xy,
              dat = dat, coords = coords),
-        file.path(cfg$dir_proc, "model_data.rds"))
-message("03 | Wrote ", file.path(cfg$dir_proc, "model_data.rds"))
+        file.path(cfg$dir_proc, paste0(cfg$species_short, "_model_data.rds")))
+message("03 | Wrote ", file.path(cfg$dir_proc, paste0(cfg$species_short, "_model_data.rds")))

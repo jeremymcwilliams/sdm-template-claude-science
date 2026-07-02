@@ -9,7 +9,7 @@
 suppressPackageStartupMessages({ library(terra); library(predicts) })
 set.seed(cfg$seed)
 
-md <- readRDS(file.path(cfg$dir_proc, "model_data.rds"))
+md <- readRDS(file.path(cfg$dir_proc, paste0(cfg$species_short, "_model_data.rds")))
 train <- md$train; test <- md$test; vars <- md$vars
 form <- as.formula(paste("pa ~", paste(vars, collapse = " + ")))
 
@@ -48,16 +48,16 @@ eval_df <- data.frame(
   n_train = nrow(train), n_test = nrow(test),
   auc = auc, cor = cor_stat, threshold_maxSSS = thr
 )
-write.csv(eval_df, file.path(cfg$dir_mod, "evaluation.csv"), row.names = FALSE)
+write.csv(eval_df, file.path(cfg$dir_mod, paste0(cfg$species_short, "_evaluation.csv")), row.names = FALSE)
 
 # ---- ROC curve (predicts' built-in plot) ------------------------------
-png(file.path(cfg$dir_fig, "04_roc.png"), width = 900, height = 900, res = 150)
+png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_04_roc.png")), width = 900, height = 900, res = 150)
 plot(ev, "ROC")
 dev.off()
 
 # ---- Variable importance (rf only) -----------------------------------
 if (cfg$method == "rf") {
-  png(file.path(cfg$dir_fig, "04_variable_importance.png"),
+  png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_04_variable_importance.png")),
       width = 1000, height = 800, res = 150)
   varImpPlot(model, main = "Random forest variable importance")
   dev.off()

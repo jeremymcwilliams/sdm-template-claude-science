@@ -24,7 +24,7 @@ if (!isTRUE(cfg$run_spatial_cv)) {
 suppressPackageStartupMessages({ library(terra); library(predicts) })
 set.seed(cfg$seed)
 
-md <- readRDS(file.path(cfg$dir_proc, "model_data.rds"))
+md <- readRDS(file.path(cfg$dir_proc, paste0(cfg$species_short, "_model_data.rds")))
 if (is.null(md$coords) || is.null(md$dat)) {
   stop("04b | model_data.rds lacks coords/dat. Re-run 03_prepare_data.R ",
        "so the coordinates needed for spatial blocking are saved.")
@@ -89,7 +89,7 @@ message(sprintf("04b | spatial AUC = %.3f +/- %.3f  (mean +/- sd over %d folds)"
 
 # ---- Pull the random-split AUC from step 04 for comparison -----------
 random_auc <- NA_real_
-ev_path <- file.path(cfg$dir_mod, "evaluation.csv")
+ev_path <- file.path(cfg$dir_mod, paste0(cfg$species_short, "_evaluation.csv"))
 if (file.exists(ev_path)) random_auc <- read.csv(ev_path)$auc[1]
 
 # ---- Write the results table -----------------------------------------
@@ -101,10 +101,10 @@ out <- rbind(
   data.frame(fold = "random_split", n_test = NA, n_test_pres = NA,
              auc = random_auc)
 )
-write.csv(out, file.path(cfg$dir_mod, "spatial_cv.csv"), row.names = FALSE)
+write.csv(out, file.path(cfg$dir_mod, paste0(cfg$species_short, "_spatial_cv.csv")), row.names = FALSE)
 
 # ---- Figure: fold map (left) + AUC comparison (right) ----------------
-png(file.path(cfg$dir_fig, "04b_spatial_cv.png"),
+png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_04b_spatial_cv.png")),
     width = 1600, height = 750, res = 150)
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 # (a) where the folds are on the map
@@ -123,5 +123,6 @@ arrows(bp[2], mean_auc - sd_auc, bp[2], mean_auc + sd_auc,
 abline(h = 0.5, lty = 3, col = "grey40")   # 0.5 = no better than chance
 text(bp, pmax(bars - 0.06, 0.04), sprintf("%.3f", bars), col = "white", font = 2)
 par(op); dev.off()
-message("04b | Wrote spatial_cv.csv + 04b_spatial_cv.png")
+message("04b | Wrote ", cfg$species_short, "_spatial_cv.csv + ",
+        cfg$species_short, "_04b_spatial_cv.png")
 }

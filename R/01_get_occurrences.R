@@ -100,7 +100,7 @@ write.csv(occ[, c("lon", "lat")], out_csv, row.names = FALSE)
 message("01 | Wrote ", out_csv)
 
 # ---- Diagnostic figure: raw vs clean ----------------------------------
-png(file.path(cfg$dir_fig, "01_occurrences_raw_vs_clean.png"),
+png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_01_occurrences_raw_vs_clean.png")),
     width = 1600, height = 800, res = 150)
 op <- par(mfrow = c(1, 2), mar = c(3, 3, 3, 1))
 plot(occ_raw$lon, occ_raw$lat, pch = 16, cex = 0.3, col = "grey50",

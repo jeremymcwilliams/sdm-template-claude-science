@@ -18,7 +18,7 @@ arc-minute resolution, random forest) under [`examples/`](examples/). For a
 one looks like, and a from-scratch explanation of the AUC/ROC plot — see
 **[`OUTPUTS.md`](OUTPUTS.md)**.
 
-![River otter habitat suitability](examples/05_suitability_map.png)
+![River otter habitat suitability](examples/river_otter_05_suitability_map.png)
 
 Predicted suitability is highest along the Pacific coast and the river
 valleys of the Northwest. Note the strong observation-bias signal: otter
@@ -48,7 +48,7 @@ deals whole blocks into folds, and holds out *entire regions* at a time —
 a harder, more honest test of whether the model transfers to places it
 has never seen.
 
-![Spatial cross-validation: fold map and AUC comparison](examples/04b_spatial_cv.png)
+![Spatial cross-validation: fold map and AUC comparison](examples/river_otter_04b_spatial_cv.png)
 
 | Evaluation | Test AUC |
 |------------|----------|
@@ -67,7 +67,7 @@ test) and `spatial_cv_k`.
 And the future projection (step 6) — 3-GCM ensemble, SSP2-4.5, end of
 century — showing where that same climate niche is projected to move:
 
-![River otter future projection, SSP2-4.5 2081-2100](examples/06_future_ssp245_2081-2100.png)
+![River otter future projection, SSP2-4.5 2081-2100](examples/river_otter_06_future_ssp245_2081-2100.png)
 
 Gains (green) appear inland and to the north; losses (red) at the warm,
 dry southern margin of the modeled niche — the fingerprint of
@@ -366,27 +366,27 @@ rather than stopping the pipeline.
 ```
 data/processed/
   <species>_occ_clean.csv     cleaned presence coordinates
-  predictors.tif              cropped bioclim stack
-  model_data.rds              train/test tables + retained predictors
+  <species>_predictors.tif    cropped bioclim stack
+  <species>_model_data.rds    train/test tables + retained predictors
 outputs/
   <species>_suitability.tif   continuous habitat suitability (0–1)
   <species>_presence.tif      binary presence at max-SSS threshold
   models/
     <species>_model.rds       fitted model object
-    evaluation.csv            AUC, correlation, threshold (random split)
-    spatial_cv.csv            per-fold + mean AUC (spatial CV, step 04b)
+    <species>_evaluation.csv  AUC, correlation, threshold (random split)
+    <species>_spatial_cv.csv  per-fold + mean AUC (spatial CV, step 04b)
   future/                                  (step 06)
     <species>_<ssp>_<period>_suitability.tif  ensemble-mean future suitability
     <species>_<ssp>_<period>_agreement.tif    # GCMs agreeing (0..n)
     <species>_<ssp>_<period>_change.tif       loss/stable/gain classes
   figures/
-    01_occurrences_raw_vs_clean.png
-    03_predictor_correlation.png
-    04_roc.png
-    04_variable_importance.png
-    04b_spatial_cv.png                        fold map + random-vs-spatial AUC
-    05_suitability_map.png
-    06_future_<ssp>_<period>.png              future suitability + change map
+    <species>_01_occurrences_raw_vs_clean.png
+    <species>_03_predictor_correlation.png
+    <species>_04_roc.png
+    <species>_04_variable_importance.png
+    <species>_04b_spatial_cv.png              fold map + random-vs-spatial AUC
+    <species>_05_suitability_map.png
+    <species>_06_future_<ssp>_<period>.png    future suitability + change map
 ```
 
 ---
@@ -400,7 +400,7 @@ outputs/
   cities, and well-surveyed regions. Spatial thinning mitigates but does
   not remove this. For publication, consider a target-group background
   or bias layer.
-- **Random split vs. spatial CV.** The headline AUC in `evaluation.csv`
+- **Random split vs. spatial CV.** The headline AUC in `<species>_evaluation.csv`
   comes from a *random* train/test split. Because occurrences are
   spatially autocorrelated, that number is optimistic — treat it as an
   upper bound. Step 04b (`run_spatial_cv`) reports the spatially-blocked

@@ -50,6 +50,6 @@ predictors <- crop(bio, e)
 message("02 | Predictor stack: ", nlyr(predictors), " layers, ",
         paste(dim(predictors)[1:2], collapse = " x "), " cells")
 
-out_tif <- file.path(cfg$dir_proc, "predictors.tif")
+out_tif <- file.path(cfg$dir_proc, paste0(cfg$species_short, "_predictors.tif"))
 writeRaster(predictors, out_tif, overwrite = TRUE)
 message("02 | Wrote ", out_tif)

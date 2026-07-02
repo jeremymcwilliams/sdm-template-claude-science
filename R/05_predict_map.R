@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------
 suppressPackageStartupMessages({ library(terra) })
 
-predictors <- rast(file.path(cfg$dir_proc, "predictors.tif"))
+predictors <- rast(file.path(cfg$dir_proc, paste0(cfg$species_short, "_predictors.tif")))
 mo <- readRDS(file.path(cfg$dir_mod, paste0(cfg$species_short, "_model.rds")))
 # The model's predict() method lives in its own package; load it so this
 # step also works when run on its own (not only via run_all.R).
@@ -40,6 +40,6 @@ sub <- if (isTRUE(cfg$borders_state) || isTRUE(cfg$borders_country))
 p <- gg_suitability(suit, cfg, borders,
                     title = paste0(cfg$species_name, " - habitat suitability"),
                     subtitle = sub, occ = occ)
-ggsave(file.path(cfg$dir_fig, "05_suitability_map.png"), p,
+ggsave(file.path(cfg$dir_fig, paste0(cfg$species_short, "_05_suitability_map.png")), p,
        width = 8, height = 8, dpi = 150)
 message("05 | Wrote suitability map figure")

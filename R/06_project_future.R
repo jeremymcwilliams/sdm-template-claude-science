@@ -33,7 +33,7 @@ cur_suit <- rast(file.path("outputs",
 cur_pres <- cur_suit >= thr
 
 # Template geometry we must match (current predictor grid)
-tmpl <- rast(file.path(cfg$dir_proc, "predictors.tif"))[[1]]
+tmpl <- rast(file.path(cfg$dir_proc, paste0(cfg$species_short, "_predictors.tif")))[[1]]
 ext_v <- ext(tmpl)
 res_m <- cfg$worldclim_res
 
@@ -98,7 +98,7 @@ for (period in cfg$future_periods) {
               subtitle = paste0("mean of ", length(cfg$future_gcm), " GCMs"))
   p_chg  <- gg_change(change, cfg, borders,
               title = paste0("Range change vs current - ", cfg$future_ssp, " ", period))
-  png(file.path(cfg$dir_fig, paste0("06_future_", cfg$future_ssp, "_", period, ".png")),
+  png(file.path(cfg$dir_fig, paste0(cfg$species_short, "_06_future_", cfg$future_ssp, "_", period, ".png")),
       width = 1700, height = 850, res = 150)
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(1, 2)))
@@ -112,4 +112,5 @@ for (period in cfg$future_periods) {
           paste(sprintf("%s:%d", c("unsuit","loss","stable","gain")[fr$value + 1], fr$count),
                 collapse = "  "))
 }
-message("06 | Done. See outputs/future/ and outputs/figures/06_*.png")
+message("06 | Done. See outputs/future/ and outputs/figures/",
+        cfg$species_short, "_06_*.png")

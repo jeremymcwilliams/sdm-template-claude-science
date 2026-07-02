@@ -15,12 +15,12 @@ tell the story of the analysis in order:
 2. `03_predictor_correlation.png` — which climate variables duplicate each other
 3. `04_roc.png` — the model's report card (the AUC curve)
 4. `04_variable_importance.png` — which climate variables mattered most
-5. `04b_spatial_cv.png` — the *honest* report card (spatial cross-validation)
+5. `<species>_04b_spatial_cv.png` — the *honest* report card (spatial cross-validation)
 6. `05_suitability_map.png` — the main result: today's suitable habitat
 7. `06_future_*.png` — where the suitable climate is projected to move
 
-Two small spreadsheets accompany them — `evaluation.csv` and
-`spatial_cv.csv` — and are explained alongside the figures they belong to.
+Two small spreadsheets accompany them — `<species>_evaluation.csv` and
+`<species>_spatial_cv.csv` — and are explained alongside the figures they belong to.
 
 Throughout, the numbers quoted are from the **river-otter example** so you
 have something concrete to compare against; your own species will differ.
@@ -29,7 +29,7 @@ have something concrete to compare against; your own species will differ.
 
 ## 1. The sightings, cleaned up — `01_occurrences_raw_vs_clean.png`
 
-![occurrences raw vs clean](examples/01_occurrences_raw_vs_clean.png)
+![occurrences raw vs clean](examples/river_otter_01_occurrences_raw_vs_clean.png)
 
 **What it shows.** Two maps of the same thing: every place your species was
 recorded. **Left ("Raw GBIF")** is the data exactly as downloaded. **Right
@@ -57,7 +57,7 @@ people looked."
 
 ## 2. Which climate variables duplicate each other — `03_predictor_correlation.png`
 
-![predictor correlation](examples/03_predictor_correlation.png)
+![predictor correlation](examples/river_otter_03_predictor_correlation.png)
 
 **What it shows.** A **correlation heatmap** of the 19 standard climate
 variables (bio1–bio19). Each little square answers: "when this variable is
@@ -94,7 +94,7 @@ this plot to check that your chosen set isn't full of dark-blue duplicates.
 
 ## 3. The model's report card — `04_roc.png` (the AUC curve)
 
-![ROC curve](examples/04_roc.png)
+![ROC curve](examples/river_otter_04_roc.png)
 
 This is the plot you mentioned seeing once before — here's the from-scratch
 version.
@@ -142,7 +142,7 @@ it ranks a true otter spot above a random spot about 95% of the time —
 strong discrimination, matching the curve's tight hug of the top-left
 corner.
 
-**Where the number is stored.** `evaluation.csv` holds the same figure in
+**Where the number is stored.** `<species>_evaluation.csv` holds the same figure in
 table form — species, method, how many points were used to train
 (`n_train`) and test (`n_test`), the `auc`, a correlation score (`cor`),
 and `threshold_maxSSS`. That last one is the "best" single cutoff the
@@ -160,7 +160,7 @@ what counts as suitable on the maps.
 
 ## 4. Which climate variables mattered most — `04_variable_importance.png`
 
-![variable importance](examples/04_variable_importance.png)
+![variable importance](examples/river_otter_04_variable_importance.png)
 
 **What it shows.** After a random-forest model is trained, it can report
 which predictors it leaned on most. This figure ranks them, most important
@@ -194,9 +194,9 @@ not a verdict.
 
 ---
 
-## 5. The honest report card — `04b_spatial_cv.png`
+## 5. The honest report card — `<species>_04b_spatial_cv.png`
 
-![spatial cross-validation](examples/04b_spatial_cv.png)
+![spatial cross-validation](examples/river_otter_04b_spatial_cv.png)
 
 **What it shows.** This is the tougher grade promised above, in two panels.
 - **Left — the fold map:** the study area is carved into large square
@@ -224,7 +224,7 @@ wasn't just an artifact of peeking at neighbors).
   transfer well to new areas. Not a failure, but a caution about how much
   to trust predictions in places far from your data.
 
-The per-fold numbers live in `spatial_cv.csv` (each fold's AUC, plus the
+The per-fold numbers live in `<species>_spatial_cv.csv` (each fold's AUC, plus the
 `spatial_mean`, its spread `spatial_sd`, and the `random_split` value for
 comparison). This whole step is optional — toggle it with `run_spatial_cv`.
 
@@ -232,7 +232,7 @@ comparison). This whole step is optional — toggle it with `run_spatial_cv`.
 
 ## 6. The main result: today's suitable habitat — `05_suitability_map.png`
 
-![suitability map](examples/05_suitability_map.png)
+![suitability map](examples/river_otter_05_suitability_map.png)
 
 **What it shows.** The payoff. The trained model is applied to every pixel
 of the study area to paint a **suitability surface** — how climatically
@@ -270,7 +270,7 @@ zones are nowhere near your dots, something upstream needs attention.
 
 ## 7. Where the climate is projected to move — `06_future_*.png`
 
-![future projection](examples/06_future_ssp245_2041-2060.png)
+![future projection](examples/river_otter_06_future_ssp245_2041-2060.png)
 
 **What it shows.** One image per future time window (the example ships
 `2041-2060` and `2081-2100`). The model, trained on today's climate, is
