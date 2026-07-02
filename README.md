@@ -186,7 +186,14 @@ source("R/06_project_future.R")   # future climate (optional)
 
 ## Configure it (`R/config.R`)
 
-Everything is set in one file. The most common edits:
+Everything is set in one file. The table below is the quick reference; for a
+**plain-language explanation of every knob** — what each value does, and what
+you gain or give up when you turn it one way versus the other — see
+**[`CONFIG.md`](CONFIG.md)**. It's written for readers new to biology and
+modeling, and it explains the "turn one knob at a time" habit that keeps your
+comparisons meaningful.
+
+The most common edits:
 
 | Knob | What it controls |
 |------|------------------|
