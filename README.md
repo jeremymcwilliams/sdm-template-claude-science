@@ -13,7 +13,10 @@ across western North America. Swap the species in one line (`R/config.R`).
 ## Example output
 
 The template ships with the outputs of a verified river otter run (10
-arc-minute resolution, random forest) under [`examples/`](examples/).
+arc-minute resolution, random forest) under [`examples/`](examples/). For a
+**plain-language walkthrough of every figure** — how to read it, what a good
+one looks like, and a from-scratch explanation of the AUC/ROC plot — see
+**[`OUTPUTS.md`](OUTPUTS.md)**.
 
 ![River otter habitat suitability](examples/05_suitability_map.png)
 
